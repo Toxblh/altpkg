@@ -1,0 +1,100 @@
+#!/bin/sh
+
+# This script is used to install the altpkg package builder.
+# https://pagure.io/fedpkg
+
+help() {
+    echo "Usage: altpkg [options]"
+    echo "Options:"
+    echo "  help     Show help information"
+    echo ""
+    echo "  search <package>     Search for a package"
+    echo "  get <package>        Get a package"
+    echo "  cache                Clear the package cache"
+}
+
+
+if [ "$1" = "help" ] || [ -z "$1" ]; then
+    help
+fi
+
+
+if [ "$1" = "search" ]; then
+    rpmgp -a "$2"
+    cd "$2" || exit
+fi
+
+if [ "$1" = "get" ]; then
+    rpmgp -gp "$2"
+fi
+
+if [ "$1" = "build" ]; then
+    rpmbsh "$2"
+fi
+
+if [ "$1" = "rebuild" ]; then
+    rpmbsh -e
+fi
+
+if [ "$1" = "update" ]; then
+    if [ -z "$2" ]; then
+        echo "Error: You should pass the new version as the second argument without 'v'."
+        exit 1
+    fi
+
+    rpmrb "$2"
+fi
+
+# Собрать пакет и установить его
+if [ "$1" = "test" ]; then
+    rpmbsh -i
+fi
+
+if [ "$1" = "cache" ]; then
+    rpmgp -r
+fi
+
+if [ "$1" = "output" ]; then
+    cd ~/hasher-sisyphus-64/ || exit
+fi
+
+if [ "$1" = "ssh" ]; then
+     eval "$(ssh-agent -s)"
+     ssh-add ~/.ssh/id_alt_team  
+fi
+
+if [ "$1" = "send" ]; then
+    case "$2" in
+        "test")
+            echo "Sending mail..."
+            ssh gyle build --test-only tuba 0.8.3-alt1
+            ;;
+        "telegram")
+            echo "Sending telegram..."
+            ;;
+        "slack")
+            echo "Sending slack..."
+            ;;
+        *)
+            echo "Error: Unknown service."
+            ;;
+    esac
+fi
+
+if [ "$1" = "send" ]; then
+    case "$2" in
+        "test")
+            echo "Sending mail..."
+            ssh gyle build --test-only tuba 0.8.3-alt1
+            ;;
+        "telegram")
+            echo "Sending telegram..."
+            ;;
+        "slack")
+            echo "Sending slack..."
+            ;;
+        *)
+            echo "Error: Unknown service."
+            ;;
+    esac
+fi
